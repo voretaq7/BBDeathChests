@@ -26,26 +26,28 @@ public class DeathChestListener implements Listener
 		ItemStack drops[] = inventory.getContents();
 		int numDrops = 0;
 
-		for (int i = 0; i < inventory.getContents().length; i++) {
+		// Count the number of items in the player's inventory: This will be useful later.
+		for (int i = 0; i < drops.length; i++) {
 			if (drops[i] != null && ! drops[i].getType().equals(Material.AIR) )
 				numDrops++;
 		}
 
-		player.sendMessage("§c§lYou died at " + deathLocation.getBlockX() + ", " + 
-				deathLocation.getBlockY() + ", " + deathLocation.getBlockZ() +  ".");
-
-		if (! blockIsChestable(deathLocation.getBlock()) ) {
-			player.sendMessage("§cYour death location is NOT suitable for a chest.");
-			player.sendMessage("§cAnything you were carrying is on the ground.");
-			return;
-		}
-
+		player.sendMessage("§c§lYou died at §e" + deathLocation.getBlockX() + ",  " + 
+				deathLocation.getBlockY() + ",  " + deathLocation.getBlockZ() +  "§c.");
 
 		if (numDrops > 0 ) {
+			//
+			if (! blockIsChestable(deathLocation.getBlock()) ) {
+				// If the player died in an unsuitable location (Lava, inside a wall, etc.)
+				// then they're not getting a chest. Sorry.
+				player.sendMessage("§cYour death location was §lNOT§r§c suitable for a chest.");
+				return;
+			}
+			
 			if (inventory.contains(Material.CHEST)) {
 				if ( numDrops < 27 ) {
 					// We have items, they fit in one chest.
-					player.sendMessage("§cYou had a chest: Your items will be safely stored in it.");
+
 					// We know the death block is Chestable, so drop a chest
 					inventory.removeItem(new ItemStack(Material.CHEST,1));
 					world.getBlockAt(deathLocation).setType(Material.CHEST);
@@ -58,6 +60,8 @@ public class DeathChestListener implements Listener
 							chest.getInventory().addItem(drops[i]);
 						}
 					}
+					player.sendMessage("§cYour items have be safely stored in a chest at your death site.");
+
 
 					// Don't double-drop: Clear the PlayerDeathEvent's drops.
 					event.getDrops().clear();
@@ -67,8 +71,6 @@ public class DeathChestListener implements Listener
 					if (inventory.contains(Material.CHEST, 2) && 
 							placeDoubleChest(deathLocation.getBlock())) {
 						// We could place a double chest.
-						player.sendMessage("§cYou had 2 chests.");
-						player.sendMessage("§cyour items will be safely stored in them.");
 						inventory.removeItem(new ItemStack(Material.CHEST,2));
 						
 						// Fill the chest (We know it's all gonna fit)
@@ -79,6 +81,7 @@ public class DeathChestListener implements Listener
 								chest.getInventory().addItem(drops[i]);
 							}
 						}
+						player.sendMessage("§cYour items have been safely stored in a double chest at your death site.");
 						
 						// Don't double-drop: Clear the PlayerDeathEvent's drops.
 						event.getDrops().clear();
@@ -87,18 +90,15 @@ public class DeathChestListener implements Listener
 						// Either the player only has one chest 
 						// or there aren't two chestable blocks to place the double.
 						// Place a single chest and stash what we can. 
-						player.sendMessage("§cYou only had one chest, or there was only room to place one.");
-						player.sendMessage("§cSome of your items will be safely stored in it.");
-						player.sendMessage("§cThe rest are on the ground - Hurry up and get them!");
 						
 						// We know the death block is Chestable, so drop a chest
-						inventory.removeItem(new ItemStack(Material.CHEST,1));
 						world.getBlockAt(deathLocation).setType(Material.CHEST);
+						inventory.removeItem(new ItemStack(Material.CHEST,1));
+						
 						
 						// Fill the chest (removing from inventory as we go)
 						Chest chest = (Chest)world.getBlockAt(deathLocation).getState();
 						drops = inventory.getContents();
-						player.sendMessage("Inventory is " + drops.toString());
 						int chest_count = 0;
 						for (int i=0 ; i < drops.length ; i++){
 							if (drops[i] != null) {
@@ -112,6 +112,7 @@ public class DeathChestListener implements Listener
 								
 							}
 						}
+						player.sendMessage("§cSome of your items have been safely stored in a chest at your death site.");
 						
 						// Don't double-drop: Clear the PlayerDeathEvent drops.
 						event.getDrops().clear();
