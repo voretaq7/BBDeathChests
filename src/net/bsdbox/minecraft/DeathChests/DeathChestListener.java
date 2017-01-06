@@ -1,6 +1,6 @@
 package net.bsdbox.minecraft.DeathChests;
 
-
+import java.util.*;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -16,6 +16,22 @@ import org.bukkit.inventory.ItemStack;
 
 public class DeathChestListener implements Listener
 {
+	private List<Material> chestable_blocks;
+	private List<Material> low_blocks;
+
+	
+	public DeathChestListener(List<Material> cb, List<Material> lb) {
+		chestable_blocks=cb;
+		low_blocks=lb;
+	}
+	
+	public DeathChestListener() {
+		// This default constructor should never be used
+		// If it is there are no chestable block types
+		// (chests can only be placed in empty/air blocks)
+		chestable_blocks = new ArrayList<Material>();
+	}
+	
 	@EventHandler
 	public void onPlayerDeath(PlayerDeathEvent event)
 	{
@@ -33,10 +49,15 @@ public class DeathChestListener implements Listener
 		}
 
 		player.sendMessage("§c§lYou died at §e" + deathLocation.getBlockX() + ",  " + 
-				deathLocation.getBlockY() + ",  " + deathLocation.getBlockZ() +  "§c.");
-
+				deathLocation.getBlockY() + ",  " + deathLocation.getBlockZ());
+		
 		if (numDrops > 0 ) {
-			//
+			// Stuff to drop, so do work.
+			
+			// If we're in a "low block" look at the block above us.
+			if (blockIsLow(deathLocation.getBlock()))
+				deathLocation.add(0,1,0);
+			
 			if (! blockIsChestable(deathLocation.getBlock()) ) {
 				// If the player died in an unsuitable location (Lava, inside a wall, etc.)
 				// then they're not getting a chest. Sorry.
@@ -127,8 +148,14 @@ public class DeathChestListener implements Listener
 	}
 	
 private boolean blockIsChestable(Block block) {
-	if (block.isEmpty() || block.getType().equals(Material.WATER) ||
-			block.getType().equals(Material.STATIONARY_WATER)) {
+	if ( block.isEmpty() || chestable_blocks.contains(block.getType()) ) {
+		return true;
+	}
+	return false;
+}
+
+private boolean blockIsLow(Block block) {
+	if ( low_blocks.contains(block.getType()) ) {
 		return true;
 	}
 	return false;
