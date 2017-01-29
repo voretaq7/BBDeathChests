@@ -13,7 +13,6 @@ public class DeathChestPlugin  extends JavaPlugin
   private PluginManager pluginManager;
   private FileConfiguration config;
   private List<Material> chestable_blocks;
-  private List<Material> low_blocks;
   
   public DeathChestPlugin() {
 	  saveDefaultConfig();
@@ -32,20 +31,12 @@ public class DeathChestPlugin  extends JavaPlugin
   
   private void loadChestables() {	  
 	  this.chestable_blocks = new ArrayList<Material>();
-	  this.low_blocks = new ArrayList<Material>();
 
 	  for (String s : config.getStringList("chestable_blocks")){
 		  if (Material.getMaterial(s) == null)
 			  this.getLogger().warning("Unknown Chestable Block Type: " + s);
 		  else
 			  chestable_blocks.add(Material.getMaterial(s));
-	  }
-	  
-	  for (String s : config.getStringList("low_blocks")) {
-		  if (Material.getMaterial(s) == null)
-			  this.getLogger().warning("Unknown Low Block Type: " +s);
-		  else
-			  low_blocks.add(Material.getMaterial(s));
 	  }
   }
   
@@ -58,7 +49,7 @@ public class DeathChestPlugin  extends JavaPlugin
   
   private void registerPlugin()
   {  
-	  this.pluginManager.registerEvents(new DeathChestListener(chestable_blocks, low_blocks), this);
+	  this.pluginManager.registerEvents(new DeathChestListener(chestable_blocks), this);
   }
   
   public JavaPlugin getPlugin()

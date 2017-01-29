@@ -1,6 +1,6 @@
 name: BBDeathChests
 main: net.bsdbox.minecraft.DeathChests.DeathChestPlugin
-version: 1.1.0
+version: 1.2.0
 author: Michael Graziano
 description: Simple Death Chests 
 commands: 

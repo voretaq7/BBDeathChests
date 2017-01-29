@@ -17,12 +17,9 @@ import org.bukkit.inventory.ItemStack;
 public class DeathChestListener implements Listener
 {
 	private List<Material> chestable_blocks;
-	private List<Material> low_blocks;
-
 	
-	public DeathChestListener(List<Material> cb, List<Material> lb) {
+	public DeathChestListener(List<Material> cb) {
 		chestable_blocks=cb;
-		low_blocks=lb;
 	}
 	
 	public DeathChestListener() {
@@ -54,15 +51,24 @@ public class DeathChestListener implements Listener
 		if (numDrops > 0 ) {
 			// Stuff to drop, so do work.
 			
-			// If we're in a "low block" look at the block above us.
-			if (blockIsLow(deathLocation.getBlock()))
-				deathLocation.add(0,1,0);
-			
 			if (! blockIsChestable(deathLocation.getBlock()) ) {
-				// If the player died in an unsuitable location (Lava, inside a wall, etc.)
-				// then they're not getting a chest. Sorry.
-				player.sendMessage("§cYour death location was §lNOT§r§c suitable for a chest.");
-				return;
+				// Well fuck - They're inside a block or something. Let's see what we can do...
+				if (blockIsChestable(deathLocation.getBlock().getRelative(BlockFace.NORTH)))
+						deathLocation.add(0,0,-1);
+				else if (blockIsChestable(deathLocation.getBlock().getRelative(BlockFace.SOUTH)))
+					deathLocation.add(0,0,1);				
+				else if (blockIsChestable(deathLocation.getBlock().getRelative(BlockFace.EAST)))
+					deathLocation.add(1,0,0);				
+				else if (blockIsChestable(deathLocation.getBlock().getRelative(BlockFace.WEST)))
+					deathLocation.add(-1,0,0);
+				else if (blockIsChestable(deathLocation.getBlock().getRelative(BlockFace.UP)))
+					deathLocation.add(0,1,0);
+				else {
+					// If we couldn't find a Chestable block within 1 space of their location
+					// then they're not getting a chest. Sorry.
+					player.sendMessage("§cYour death location was §lNOT§r§c suitable for a chest.");
+					return;
+				}
 			}
 			
 			if (inventory.contains(Material.CHEST)) {
@@ -149,13 +155,6 @@ public class DeathChestListener implements Listener
 	
 private boolean blockIsChestable(Block block) {
 	if ( block.isEmpty() || chestable_blocks.contains(block.getType()) ) {
-		return true;
-	}
-	return false;
-}
-
-private boolean blockIsLow(Block block) {
-	if ( low_blocks.contains(block.getType()) ) {
 		return true;
 	}
 	return false;

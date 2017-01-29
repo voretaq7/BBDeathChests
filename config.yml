@@ -1,5 +1,5 @@
 # BBDeathChests Configuration
-# Version 1.1
+# Version 1.2
 
 # Block types that can be replaced with a chest
 # Refer to list of material types in Bukkit's Material enum
@@ -12,15 +12,5 @@ chestable_blocks:
 - 'DOUBLE_PLANT'         # 2-high plants, very tall grass, etc.
 - 'YELLOW_FLOWER'        # Yellow flowers (Red isn't a material type)
 - 'CROPS'                # Assorted "crops" (or make them a low block)
-- 'SNOW'                 # Snow-covered block (make a low block to preserve)
+- 'SNOW'                 # Snow-covered block
 
-# Block types that are screwy: You're technically INSIDE
-# these when you stand on them, so add 1 to the death
-# location's Y value before checking chest-ability.
-low_blocks:
-- 'SOIL'                 # You're "inside" soil when standing on it.
-- 'CARPET'               # We don't want to destroy carpets.
-- 'STEP'                 # Assorted stone slabs
-- 'STONE_SLAB2'          # Newer stone slabs
-- 'WOOD_STEP'            # Assorted wood slabs
-- 'PURPUR_SLAB'          # Purpur Slabs
