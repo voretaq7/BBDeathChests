@@ -25,3 +25,5 @@ chestable_blocks:
 - 'TALL_GRASS'            # 2-Block Grass (on land)
 - 'FERN'                  # 1-Block Ferns
 - 'LARGE_FERN'            # 2-Block Ferns
+
+location_message: true    # Tell players where they died.

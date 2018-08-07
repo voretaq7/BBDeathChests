@@ -13,6 +13,8 @@ public class DeathChestPlugin  extends JavaPlugin
   private PluginManager pluginManager;
   private FileConfiguration config;
   private List<Material> chestable_blocks;
+  public final boolean msgDeathLocation;
+  public final boolean msgDebug;
   
   public DeathChestPlugin() {
 	  saveDefaultConfig();
@@ -26,7 +28,15 @@ public class DeathChestPlugin  extends JavaPlugin
     config = getConfig();
     loadChestables();
 	  
-	registerPlugin();
+    registerPlugin();
+  }
+
+  public boolean msgLocation() {
+    config.getBoolean("location_message", true);
+  }
+
+  public boolean debug() {
+    config.getBoolean("debug", false);
   }
   
   private void loadChestables() {	  
@@ -57,3 +67,4 @@ public class DeathChestPlugin  extends JavaPlugin
     return this.plugin;
   }
 }
+

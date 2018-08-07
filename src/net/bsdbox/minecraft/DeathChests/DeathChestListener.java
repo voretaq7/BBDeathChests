@@ -47,13 +47,15 @@ public class DeathChestListener implements Listener
 				numDrops++;
 		}
 
-		player.sendMessage("§c§lYou died at §e" + deathLocation.getBlockX() + ",  " + 
-				deathLocation.getBlockY() + ",  " + deathLocation.getBlockZ());
+		if ( plugin.msgLocation() ) {
+			player.sendMessage("§c§lYou died at §e" + deathLocation.getBlockX() + ",  " + 
+					deathLocation.getBlockY() + ",  " + deathLocation.getBlockZ());
+		}
 		
 		if (numDrops > 0 ) { // Player had items
 			if (inventory.contains(Material.CHEST)) { // Player had at least one chest
 				// Schedule a test drop in 5 ticks (0.25 seconds)
-				Bukkit.getScheduler().runTaskLater(plugin, new DeathChestTask(plauer, drops, deathLocation, chestable_blocks), 5);
+				Bukkit.getScheduler().runTaskLater(plugin, new DeathChestTask(player, drops, deathLocation, chestable_blocks), 5);
 				event.getDrops().clear(); // Don't double-drop: Clear the PlayerDeathEvent's drops.
 			} else {
 				// No chests - Items will drop on the ground as normal.

@@ -64,10 +64,17 @@ public class DeathChestTask extends Runnable
 						deathLocation.world().dropItemNaturally(deathLocation, drops[i]);
 					}
 				}
-				player.sendMessage("§cYour death location was §lNOT§r§c suitable for a chest.");
 				player.sendMessage("§cYour items are on the ground. Hurry up and retrieve them!");
-				player.sendMessage(deathLocation.getBlock().getType().name());
-				player.sendMessage(deathLocation.getBlock().getRelative(BlockFace.UP).getType().name());
+				if (plugin.debug()) {
+					// Debugging: Print the block type for everything we looked at.
+					player.sendMessage("§cLocations examined were §lNOT§r§c suitable for a chest.");
+					player.sendMessage("Block: " + deathLocation.getBlock().getType().name());
+					player.sendMessage("Above: " + deathLocation.getBlock().getRelative(BlockFace.UP).getType().name());
+					player.sendMessage("North: " + deathLocation.getBlock().getRelative(BlockFace.NORTH).getType().name());
+					player.sendMessage("East:  " + deathLocation.getBlock().getRelative(BlockFace.EAST).getType().name());
+					player.sendMessage("South: " + deathLocation.getBlock().getRelative(BlockFace.SOUTH).getType().name());
+					player.sendMessage("West:  " + deathLocation.getBlock().getRelative(BlockFace.WEST).getType().name());
+				}
 
 				return;
 			}
