@@ -67,87 +67,64 @@ public class DeathChestListener implements Listener
 					// If we couldn't find a Chestable block within 1 space of their location
 					// then they're not getting a chest. Sorry.
 					player.sendMessage("§cYour death location was §lNOT§r§c suitable for a chest.");
+					player.sendMessage(deathLocation.getBlock().getType().name());
+					player.sendMessage(deathLocation.getBlock().getRelative(BlockFace.UP).getType().name());
+
 					return;
 				}
 			}
 			
 			if (inventory.contains(Material.CHEST)) {
-				if ( numDrops < 27 ) {
-					// We have items, they fit in one chest.
-
+					BlockFace secondChest;
 					// We know the death block is Chestable, so drop a chest
 					inventory.removeItem(new ItemStack(Material.CHEST,1));
 					world.getBlockAt(deathLocation).setType(Material.CHEST);
+					
+					// If we need to drop a second chest & have one do that too
+					if (numDrops > 27 && inventory.contains(Material.CHEST)) {
+						secondChest = placeSecondChest(deathLocation.getBlock());
+						if (secondChest != BlockFace.SELF) {
+							inventory.removeItem(new ItemStack(Material.CHEST,1));
+						}
+					} else {
+						secondChest = BlockFace.SELF;
+					}
 
 					// Fill the chest (We know it's all gonna fit)
-					Chest chest = (Chest)world.getBlockAt(deathLocation).getState();
+					Chest chest1 = (Chest)world.getBlockAt(deathLocation).getState();
+					Chest chest2 = (Chest)world.getBlockAt(deathLocation).getRelative(secondChest).getState();
+					
 					drops = inventory.getContents();
+					int chest_count = 0;
+					int ground_count = 0;
 					for (int i=0 ; i < drops.length ; i++){
 						if (drops[i] != null) {
-							chest.getInventory().addItem(drops[i]);
+							if (chest_count < 27) {
+								chest1.getInventory().addItem(drops[i]);
+								chest_count++;
+							} else if (chest_count < 54 && secondChest != BlockFace.SELF) {
+								chest2.getInventory().addItem(drops[i]);
+								chest_count++;
+							}
+							else {
+								world.dropItemNaturally(deathLocation, drops[i]);
+								ground_count++;
+							}
 						}
 					}
-					player.sendMessage("§cYour items have be safely stored in a chest at your death site.");
+					if (ground_count > 0) {
+						player.sendMessage("§cSome of your items have been safely stored in a chest at your death site.");
+						player.sendMessage("§cHurry up and retrieve the rest!");
 
+					} else {
+						player.sendMessage("§cAll of your items have be safely stored in a chest at your death site.");
+					}
 
 					// Don't double-drop: Clear the PlayerDeathEvent's drops.
 					event.getDrops().clear();
 				} 
-				else {
-					// We have more items than fit in one chest.
-					if (inventory.contains(Material.CHEST, 2) && 
-							placeDoubleChest(deathLocation.getBlock())) {
-						// We could place a double chest.
-						inventory.removeItem(new ItemStack(Material.CHEST,2));
-						
-						// Fill the chest (We know it's all gonna fit)
-						Chest chest = (Chest)world.getBlockAt(deathLocation).getState();
-						drops = inventory.getContents();
-						for (int i=0 ; i < drops.length ; i++){
-							if (drops[i] != null) {
-								chest.getInventory().addItem(drops[i]);
-							}
-						}
-						player.sendMessage("§cYour items have been safely stored in a double chest at your death site.");
-						
-						// Don't double-drop: Clear the PlayerDeathEvent's drops.
-						event.getDrops().clear();
-					}
-					else {
-						// Either the player only has one chest 
-						// or there aren't two chestable blocks to place the double.
-						// Place a single chest and stash what we can. 
-						
-						// We know the death block is Chestable, so drop a chest
-						world.getBlockAt(deathLocation).setType(Material.CHEST);
-						inventory.removeItem(new ItemStack(Material.CHEST,1));
-						
-						
-						// Fill the chest (removing from inventory as we go)
-						Chest chest = (Chest)world.getBlockAt(deathLocation).getState();
-						drops = inventory.getContents();
-						int chest_count = 0;
-						for (int i=0 ; i < drops.length ; i++){
-							if (drops[i] != null) {
-								if (chest_count < 27) {
-									chest.getInventory().addItem(drops[i]);
-									chest_count++;
-								}
-								else {
-									world.dropItemNaturally(deathLocation, drops[i]);
-								}
-								
-							}
-						}
-						player.sendMessage("§cSome of your items have been safely stored in a chest at your death site.");
-						
-						// Don't double-drop: Clear the PlayerDeathEvent drops.
-						event.getDrops().clear();
-					} 
-				}
-			}
 			else {
-				player.sendMessage("§cYou did not have a chest, so your items are on the ground.");
+				player.sendMessage("§cYou did not have any chests, so your items are on the ground.");
 				player.sendMessage("§cHurry up and retrieve them!");
 			}
 		}
@@ -160,32 +137,28 @@ private boolean blockIsChestable(Block block) {
 	return false;
 }
 
-private boolean placeDoubleChest(Block block)
+private BlockFace placeSecondChest(Block block)
 {
 	if (blockIsChestable(block.getRelative(BlockFace.NORTH)))
 	{
-		block.setType(Material.CHEST);
 		block.getRelative(BlockFace.NORTH).setType(Material.CHEST);
-		return true;
+		return BlockFace.NORTH;
 	}
 	if (blockIsChestable(block.getRelative(BlockFace.EAST)))
 	{
-		block.setType(Material.CHEST);
 		block.getRelative(BlockFace.EAST).setType(Material.CHEST);
-		return true;
+		return BlockFace.EAST;
 	}
 	if (blockIsChestable(block.getRelative(BlockFace.SOUTH)))
 	{
-		block.setType(Material.CHEST);
 		block.getRelative(BlockFace.SOUTH).setType(Material.CHEST);
-		return true;
+		return BlockFace.SOUTH;
 	}
 	if (blockIsChestable(block.getRelative(BlockFace.WEST)))
 	{
-		block.setType(Material.CHEST);
 		block.getRelative(BlockFace.WEST).setType(Material.CHEST);
-		return true;
+		return BlockFace.WEST;
 	}
-	return false;
+	return BlockFace.SELF;
 }
 }
