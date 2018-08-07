@@ -8,15 +8,18 @@ they die, and gives them their death coordinates.
 The plugin will place a single chest if:
 
 1. The player had a chest in their inventory.
-2. The player's death location is a "suitable" block.  
-Currently "suitable" is defined as air or water.
+2. One of the following blocks is "chestable"
+  * The block at the player's death location
+  * A block adjacent to the player's death location (North, South, East, or West - for fences, galss panes, etc.)
+  * The block immediately above the player's death location (for farmland, carpet, slabs, stairs, etc.)
+By default "chestable" block means air (empty) or water but this can be customized.
 
 The plugin will attempt to place a double-chest if the player's inventory
 will not fit in a single chest, subject to the following constraints:
 
 1. The player must have *two* chests in their inventory.
-2. The player's death location must be a suitable block.
-3. The adjacent the North, South, East, or West must be a suitable block.
+2. The plugin found a "chestable" block as described in (2) above.
+3. At least one adjacent block is (North, South, East, or West) is also chestable.
   
 If the plugin is unable to place a double chest it will fall back to placing
 a single chest, and excess items will be dropped on the ground.    
