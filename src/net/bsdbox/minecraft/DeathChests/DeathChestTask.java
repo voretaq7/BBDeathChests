@@ -28,18 +28,20 @@ public class DeathChestTask implements Runnable
 
 	@Override
 	public void run() {
-		BlockFace secondChest = BlockFace.SELF; // Location of second chest, if needed.
+		BlockFace secondChest = BlockFace.SELF; // Location of second chest
         int numDrops = 0;
         ItemStack d[];
-		// Count the number of items in the player's inventory: This will be useful later.
+		// Count the number of items dropped.
 		for (int i = 0; i < drops.getContents().length; i++) {
-			if (drops.getContents()[i] != null && ! drops.getContents()[i].getType().equals(Material.AIR) )
+			if (drops.getContents()[i] != null &&
+			    ! drops.getContents()[i].getType().equals(Material.AIR) )
 				numDrops++;
 		}
 
 		// Try to find a place to put the player's death chest.
 		if (! blockIsChestable(deathLocation.getBlock()) ) {
-			// Well fuck - They're inside a block or something. Let's see what we can do...
+			// Well fuck - They're inside a block or something.
+			// Let's see what we can do...
 			if (blockIsChestable(deathLocation.getBlock().getRelative(BlockFace.NORTH)))
 					deathLocation.add(0,0,-1);
 			else if (blockIsChestable(deathLocation.getBlock().getRelative(BlockFace.SOUTH)))
@@ -51,8 +53,8 @@ public class DeathChestTask implements Runnable
 			else if (blockIsChestable(deathLocation.getBlock().getRelative(BlockFace.UP)))
 				deathLocation.add(0,1,0);
 			else {
-				// If we couldn't find a Chestable block within 1 space of their location
-				// then they're not getting a chest. Sorry.
+				// If we couldn't find a Chestable block within 1 space
+				// of the death location they're not getting a chest. Sorry.
 				d = drops.getContents();
 				for (int i=0 ; i < d.length ; i++){
 					if (d[i] != null) {
@@ -75,7 +77,7 @@ public class DeathChestTask implements Runnable
 			}
 		}
 
-		// We know the death block is Chestable, so drop a chest
+		// We know the deathLocation block is Chestable, so drop a chest
 		drops.removeItem(new ItemStack(Material.CHEST,1));
 		deathLocation.getBlock().setType(Material.CHEST);
 
