@@ -26,4 +26,5 @@ chestable_blocks:
 - 'FERN'                  # 1-Block Ferns
 - 'LARGE_FERN'            # 2-Block Ferns
 
+delay: 5                  # Number of ticks before spawning chests
 location_message: true    # Tell players where they died.

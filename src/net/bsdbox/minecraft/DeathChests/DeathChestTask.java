@@ -3,43 +3,37 @@ package net.bsdbox.minecraft.DeathChests;
 import java.util.*;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.java.JavaPlugin;
 
-public class DeathChestTask extends Runnable 
+public class DeathChestTask implements Runnable
 {
-	private final DeathChestPlugin plugin;
 	private Player player;
-	private World world;
-	private ItemStack drops;
+	private Inventory drops;
 	private Location deathLocation;
 	private List<Material> chestable_blocks;
+	private boolean debug;
 
-	public DeathChestTask(DeathChestPlugin pl, Player P, ItemStack D, Location L, List<Material> CB) {
-		plugin = pl;
+	public DeathChestTask(Player P, Inventory D, Location L, List<Material> CB, boolean dbg) {
 		player = P;
 		drops = D;
 		deathLocation = L;
 		chestable_blocks = CB;
+		debug=dbg;
 	}
 
 	@Override
-	Public void run() {
+	public void run() {
 		BlockFace secondChest = BlockFace.SELF; // Location of second chest, if needed.
-		int numDrops = 0;                       // Number of items to drop
-
+        int numDrops = 0;
+        ItemStack d[];
 		// Count the number of items in the player's inventory: This will be useful later.
-		for (int i = 0; i < drops.length; i++) {
-			if (drops[i] != null && ! drops[i].getType().equals(Material.AIR) )
+		for (int i = 0; i < drops.getContents().length; i++) {
+			if (drops.getContents()[i] != null && ! drops.getContents()[i].getType().equals(Material.AIR) )
 				numDrops++;
 		}
 
@@ -59,13 +53,14 @@ public class DeathChestTask extends Runnable
 			else {
 				// If we couldn't find a Chestable block within 1 space of their location
 				// then they're not getting a chest. Sorry.
-				for (int i=0 ; i < drops.length ; i++){
-					if (drops[i] != null) {
-						deathLocation.world().dropItemNaturally(deathLocation, drops[i]);
+				d = drops.getContents();
+				for (int i=0 ; i < d.length ; i++){
+					if (d[i] != null) {
+						deathLocation.getWorld().dropItemNaturally(deathLocation, d[i]);
 					}
 				}
 				player.sendMessage("§cYour items are on the ground. Hurry up and retrieve them!");
-				if (plugin.debug()) {
+				if (debug) {
 					// Debugging: Print the block type for everything we looked at.
 					player.sendMessage("§cLocations examined were §lNOT§r§c suitable for a chest.");
 					player.sendMessage("Block: " + deathLocation.getBlock().getType().name());
@@ -81,14 +76,14 @@ public class DeathChestTask extends Runnable
 		}
 
 		// We know the death block is Chestable, so drop a chest
-		inventory.removeItem(new ItemStack(Material.CHEST,1));
+		drops.removeItem(new ItemStack(Material.CHEST,1));
 		deathLocation.getBlock().setType(Material.CHEST);
 
 		// If we need to drop a second chest & have one do that too
-		if (numDrops > 27 && inventory.contains(Material.CHEST)) {
+		if (numDrops > 27 && drops.contains(Material.CHEST)) {
 			secondChest = placeSecondChest(deathLocation.getBlock());
 			if (secondChest != BlockFace.SELF) {
-				inventory.removeItem(new ItemStack(Material.CHEST,1));
+				drops.removeItem(new ItemStack(Material.CHEST,1));
 			}
 		}
 
@@ -100,17 +95,18 @@ public class DeathChestTask extends Runnable
 		// Fill the chests
 		int chest_count = 0;
 		int ground_count = 0;
-		for (int i=0 ; i < drops.length ; i++){
-			if (drops[i] != null) {
+		d = drops.getContents();
+		for (int i=0 ; i < d.length ; i++){
+			if (d[i] != null) {
 				if (chest_count < 27) {
-					chest1.getInventory().addItem(drops[i]);
+					chest1.getInventory().addItem(d[i]);
 					chest_count++;
 				} else if (chest_count < 54 && secondChest != BlockFace.SELF) {
-					chest2.getInventory().addItem(drops[i]);
+					chest2.getInventory().addItem(d[i]);
 					chest_count++;
 				}
 				else {
-					deathLocation.world().dropItemNaturally(deathLocation, drops[i]);
+					deathLocation.getWorld().dropItemNaturally(deathLocation, d[i]);
 					ground_count++;
 				}
 			}

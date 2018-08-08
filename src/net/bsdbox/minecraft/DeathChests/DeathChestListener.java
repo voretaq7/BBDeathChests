@@ -1,18 +1,18 @@
 package net.bsdbox.minecraft.DeathChests;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
+
 
 public class DeathChestListener implements Listener
 {
@@ -24,10 +24,11 @@ public class DeathChestListener implements Listener
 		chestable_blocks=cb;
 	}
 	
-	public DeathChestListener() {
+	public DeathChestListener(DeathChestPlugin P) {
 		// This default constructor should never be used
 		// If it is there are no chestable block types
 		// (chests can only be placed in empty/air blocks)
+		plugin = P;
 		chestable_blocks = new ArrayList<Material>();
 	}
 	
@@ -35,16 +36,19 @@ public class DeathChestListener implements Listener
 	public void onPlayerDeath(PlayerDeathEvent event)
 	{
 		Player player = event.getEntity();
-		World world = player.getWorld();
-		Inventory inventory = player.getInventory();
+		Inventory inventory = plugin.getServer().createInventory(null, 54);
 		Location deathLocation = player.getLocation();
-		ItemStack drops[] = inventory.getContents();
-		int numDrops = 0;
+		int numDrops = event.getDrops().size();
 
-		// Count the number of items in the player's inventory: This will be useful later.
-		for (int i = 0; i < drops.length; i++) {
-			if (drops[i] != null && ! drops[i].getType().equals(Material.AIR) )
-				numDrops++;
+		if (numDrops > 54) { // I don't know how you did this...
+			player.sendMessage("§c§lYou had more items than can fit in a double chest.");
+			player.sendMessage("§c§lYour items are on the ground. Hurry up and retrieve them!");
+			return;
+
+		} else {
+			for (ItemStack item : event.getDrops()) {
+				inventory.addItem(item);
+			}
 		}
 
 		if ( plugin.msgLocation() ) {
@@ -55,7 +59,11 @@ public class DeathChestListener implements Listener
 		if (numDrops > 0 ) { // Player had items
 			if (inventory.contains(Material.CHEST)) { // Player had at least one chest
 				// Schedule a test drop in 5 ticks (0.25 seconds)
-				Bukkit.getScheduler().runTaskLater(plugin, new DeathChestTask(player, drops, deathLocation, chestable_blocks), 5);
+				plugin.getServer().getScheduler().runTaskLater((Plugin)plugin,
+						(Runnable) new DeathChestTask(player, inventory, deathLocation,
+														chestable_blocks,
+														plugin.debug()),
+						plugin.delay());
 				event.getDrops().clear(); // Don't double-drop: Clear the PlayerDeathEvent's drops.
 			} else {
 				// No chests - Items will drop on the ground as normal.
